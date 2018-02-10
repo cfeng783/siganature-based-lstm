@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 from keras.models import model_from_json
 from keras.models import Sequential  
-from keras.layers.core import Dense, Activation  
+from keras.layers.core import Dense, Activation, Dropout
 from keras.layers.recurrent import LSTM
 import keras.metrics as metrics
 import random
@@ -101,7 +101,7 @@ def _load_data(dataset, onehot_entries):
             filter_result.append(dataset.loc[i+lookback, 'bf result'])
         else:
             dataX_copy = dataset.iloc[i:i+lookback].copy()
-            for j in range(lookback):
+            for j in range(lookback):##corruput input
                 if(random.random()<alpha/(alpha+data.loc[i+j,'freq'])):
                     choice = random.randint(0,len(disc_input)-1)
                     chosen_feature = disc_input[choice]
@@ -156,7 +156,8 @@ input_dim = trainX.shape[2]
 output_dim = trainY.shape[1]
                    
 model = Sequential()
-model.add(LSTM(256, input_shape=(lookback,input_dim), return_sequences=True))  
+model.add(Dropout(0.4,input_shape=(lookback,input_dim))) ##dropout to increase generality
+model.add(LSTM(256,  return_sequences=True))  
 model.add(LSTM(256, return_sequences=False))
 model.add(Dense(output_dim))  
 model.add(Activation("softmax"))   
